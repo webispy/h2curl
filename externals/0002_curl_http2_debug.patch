@@ -1,0 +1,13 @@
+diff --git a/lib/http2.c b/lib/http2.c
+index 7d56e2280..d514c2c69 100644
+--- a/lib/http2.c
++++ b/lib/http2.c
+@@ -58,6 +58,8 @@
+
+ #define HTTP2_HUGE_WINDOW_SIZE (32 * 1024 * 1024) /* 32 MB */
+
++#define DEBUG_HTTP2
++
+ #ifdef DEBUG_HTTP2
+ #define H2BUGF(x) x
+ #else

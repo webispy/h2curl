@@ -1,0 +1,6 @@
+[submodule "externals/curl"]
+	path = externals/curl
+	url = https://github.com/curl/curl.git
+[submodule "externals/nghttp2"]
+	path = externals/nghttp2
+	url = https://github.com/nghttp2/nghttp2.git

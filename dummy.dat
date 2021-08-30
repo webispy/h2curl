@@ -1,0 +1,7 @@
+--nugusdk.boundary.14977be1c88d3131
+Content-Disposition: form-data; name="event"
+Content-Type: application/json
+
+{ "context": {"client":{"os":"Linux","playStack":[],"wakeupWord":"Aria"},"supportedInterfaces":{"ASR":{"engine":"skt","initiator":"TAP","state":"IDLE","version":"1.6"},"AudioPlayer":{"lyricsVisible":false,"offsetInMilliseconds":0,"playerActivity":"IDLE","version":"1.6"},"Chips":{"version":"1.2"},"Display":{"version":"1.8"},"Extension":{"data":{},"version":"1.1"},"Mic":{"micStatus":"ON","version":"1.0"},"Nudge":{"version":"1.0"},"Routine":{"routineActivity":"IDLE","version":"1.2"},"Session":{"version":"1.0"},"Sound":{"version":"1.0"},"Speaker":{"version":"1.2","volumes":[{"defaultVolumeLevel":50,"defaultVolumeStep":10,"maxVolume":100,"minVolume":0,"muted":false,"name":"NUGU","volume":50}]},"System":{"version":"1.3"},"TTS":{"engine":"skt","ttsActivity":"IDLE","version":"1.3"},"Text":{"version":"1.5"},"Utility":{"version":"1.0"}}}, "event": { "header": { "dialogRequestId": "137b05ae6901b4aac5a794dee53cf03b", "messageId": "137b05ae6901b4aac5a794de32e6667c", "name": "Recognize", "namespace": "ASR", "version": "1.6" }, "payload": {"codec":"SPEEX","encoding":"COMPLETE","endpointing":"CLIENT","language":"KOR"} } }
+--nugusdk.boundary.14977be1c88d3131
+
