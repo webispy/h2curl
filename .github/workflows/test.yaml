@@ -1,0 +1,55 @@
+name: test
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      comment:
+        description: 'Comment'
+        required: false
+        default: ''
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        curlHash:
+          [
+            c4e6968,
+            842f73d
+          ]
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Fetch submodule with history
+        run: git submodule update --init
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: Install npm modules
+        run: cd server && npm install
+      - name: Start sample server
+        run: |
+          cd server
+          npm start | tee ../${{ matrix.curlHash }}_server.log &
+      - name: Install dependency packages
+        run: sudo apt install -y build-essential cmake git pkg-config
+      - name: Select libcurl version ${{ matrix.curlHash }}
+        run: |
+          cd externals/curl
+          git checkout ${{ matrix.curlHash }}
+      - name: Build
+        run: |
+          mkdir build && cd build
+          cmake ..
+          make
+      - name: Test HTTP/2 POST
+        run: ./build/src/h2post 2>&1 | tee ${{ matrix.curlHash }}_client.log
+      - name: Build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: log
+          path: ./*.log
