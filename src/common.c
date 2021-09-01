@@ -58,7 +58,6 @@ int my_trace(CURL *handle, curl_infotype type, char *data, size_t size,
 {
 	char timebuf[60];
 	const char *text;
-	struct input *i = (struct input *)userp;
 	static time_t epoch_offset;
 	static int known_offset;
 	struct timeval tv;
