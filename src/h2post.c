@@ -70,7 +70,7 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
 
 	/* read 100 bytes per each callback */
 	size_t retcode = fread(ptr, 1, 100, i->in);
-	printf("\n\e[7mread %zd bytes from file\e[0m\n\n", retcode);
+	fprintf(stderr, "\nread %zu bytes from file\n\n", retcode);
 
 	return retcode;
 }
@@ -93,7 +93,7 @@ static void setup_post(struct input *i, const char *upload)
 	}
 
 	uploadsize = file_info.st_size;
-	printf("\nuploadsize = %zd\n\n", uploadsize);
+	fprintf(stderr, "\nuploadsize = %zd\n\n", uploadsize);
 
 	i->in = fopen(upload, "rb");
 	if (!i->in)
@@ -104,7 +104,7 @@ static void setup_post(struct input *i, const char *upload)
 		exit(1);
 	}
 
-	printf("\n\e[1m> PATH " PATH_POST "\e[0m\n\n");
+	fprintf(stderr, "\n> PATH " PATH_POST "\n\n");
 
 	/* we want to use our own read function */
 	curl_easy_setopt(hnd, CURLOPT_POST, 1L);
@@ -149,7 +149,7 @@ static void setup_get(struct input *i)
 	hnd = i->hnd = curl_easy_init();
 	i->headers = NULL;
 
-	printf("\n\e[1m> GET " PATH_GET "\e[0m\n\n");
+	fprintf(stderr, "\n> GET " PATH_GET "\n\n");
 
 	/* set the same URL */
 	curl_easy_setopt(hnd, CURLOPT_URL, PATH_GET);
@@ -213,7 +213,7 @@ int main(int argc, char **argv)
 
 		time(&now);
 
-		printf(".\n");
+		fprintf(stderr, ".\n");
 
 		/* after 7 seconds, POST request start */
 		if (now - base_time >= 7 && fired == 0)
