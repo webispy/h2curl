@@ -1,9 +1,15 @@
 SET(CURL_TESTS
     h2post
+    issue7630
 )
 
 FOREACH(test ${CURL_TESTS})
-    ADD_EXECUTABLE(${test} ${test}.c common.c)
+    IF("${test}" MATCHES "^h2")
+        ADD_EXECUTABLE(${test} ${test}.c common.c)
+    ELSE()
+        ADD_EXECUTABLE(${test} ${test}.c)
+    ENDIF()
+
     TARGET_COMPILE_OPTIONS(${test} PRIVATE
         -Werror -Wall -Wextra
         # Additional warnings
