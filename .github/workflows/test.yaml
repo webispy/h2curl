@@ -19,7 +19,13 @@ jobs:
         curlHash:
           [
             c4e6968,
-            842f73d
+            842f73d,
+            master
+          ]
+        testApp:
+          [
+            h2post,
+            issue7630
           ]
     steps:
       - name: Check out the repo
@@ -47,7 +53,7 @@ jobs:
           cmake ..
           make
       - name: Test HTTP/2 POST
-        run: ./build/src/h2post 2>&1 | tee ${{ matrix.curlHash }}_client.log
+        run: ./build/src/${{ matrix.testApp }} 2>&1 | tee ${{ matrix.curlHash }}_client.log
       - name: Build artifacts
         uses: actions/upload-artifact@v2
         with:
