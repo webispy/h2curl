@@ -1,0 +1,118 @@
+@startuml
+participant client
+participant "curl library" as curl
+box server
+participant "/longPolling" as server_get
+participant "/post" as server_post
+end box
+
+title Test with libcurl #c4e6968 (or master) - abnormal operation
+
+client->curl: GET /longPolling Request
+curl --> server_get: Send header (stream-1)
+note left of curl
+    GET /longPolling HTTP/2
+    Host: 127.0.0.1:8081
+    accept: */*
+end note
+
+activate server_get
+server_get --> curl: header
+note left of server_get
+    HTTP/2 200
+    content-type: ...; boundary=...
+    date: Mon, 06 Sep 2021 00:51:54 GMT
+end note
+server_get --> curl: data
+note left of server_get
+  --example-boundary-1234
+end note
+
+... <b>after 7 seconds</b> ...
+
+client->curl: POST /post Request
+curl --> server_post: Send header (stream-3)
+note left of curl
+    POST /post HTTP/2
+    Host: 127.0.0.1:8081
+    accept: */*
+    content-type: ...; boundary=...
+end note
+
+activate server_post
+curl -> client: CURLOPT_READFUNCTION callback
+activate client
+return return 100 bytes
+curl --> server_post: Send data (100 bytes)
+curl -> client: CURLOPT_READFUNCTION callback
+activate client
+return return 100 bytes
+curl --> server_post: Send data (100 bytes)
+
+... cont ...
+
+server_post --> curl: header
+note left of server_post
+    HTTP/2 200
+    date: Mon, 06 Sep 2021 00:52:01 GMT
+end note
+
+note over curl #cccccc
+    Continued libcurl log output:
+    00:52:01.719400 Info: http2_recv: easy 0x556f9f437c38 (stream 3) win 33554408/33554432
+    .
+    00:52:01.719420 Info: http2_recv: easy 0x556f9f437c38 (stream 3) win 33554408/33554432
+    ...
+end note
+
+... <b>after 3 seconds</b> ...
+
+note over curl #cccccc
+    .
+    00:52:04.529445 Info: http2_recv: easy 0x556f9f437c38 (stream 3) win 33554408/33554432
+    .
+    00:52:04.529457 Info: http2_recv: easy 0x556f9f437c38 (stream 3) win 33554408/33554432
+    ...
+end note
+
+server_get --> curl: data
+note left of server_get
+    "GET-FINISHED"
+end note
+deactivate server_get
+
+note over curl #cccccc
+    .
+    00:52:04.544702 Info: http2_recv: easy 0x556f9f3618d8 (stream 1) win 33554396/33554396
+    .
+    00:52:04.544763 Info: http2_recv: easy 0x556f9f3618d8 (stream 0) win 33554396/4294967295
+    ...
+end note
+
+... <b>after 2 seconds</b> ...
+
+note over curl #cccccc
+    .
+    00:52:06.720503 Info: http2_recv: easy 0x556f9f437c38 (stream 3) win 33554396/33554432
+    .
+    00:52:06.720516 Info: http2_recv: easy 0x556f9f437c38 (stream 3) win 33554396/33554432
+end note
+
+server_post --> curl: data
+note left of server_post
+    "POST-FINISHED"
+end note
+
+note over curl #cccccc
+    00:52:06.720645 Info: http2_recv: easy 0x556f9f437c38 (stream 3) win 33554383/33554419
+end note
+
+curl -> client: CURLOPT_READFUNCTION callback
+activate client
+return return 74 bytes
+curl -> server_post: Send data (74 bytes)
+curl -> client: CURLOPT_READFUNCTION callback
+activate client
+return return 0 bytes (no more data)
+
+@enduml

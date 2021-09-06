@@ -1,0 +1,84 @@
+@startuml
+participant client
+participant "curl library" as curl
+box server
+participant "/longPolling" as server_get
+participant "/post" as server_post
+end box
+
+title Test with libcurl #842f73d - normal operation
+
+client->curl: GET /longPolling Request
+curl --> server_get: Send header (stream-1)
+note right of curl
+    GET /longPolling HTTP/2
+    Host: 127.0.0.1:8081
+    accept: */*
+end note
+
+activate server_get
+server_get --> curl: header
+note left of server_get
+    HTTP/2 200
+    content-type: multipart/related; boundary=...
+    date: Mon, 06 Sep 2021 00:51:44 GMT
+end note
+server_get --> curl: data
+note left of server_get
+  --example-boundary-1234
+end note
+
+... <b>after 7 seconds</b> ...
+
+client->curl: POST /post Request
+curl --> server_post: Send header (stream-3)
+note right of curl
+    POST /post HTTP/2
+    Host: 127.0.0.1:8081
+    accept: */*
+    content-type: multipart/form-data; boundary=...
+end note
+
+activate server_post
+curl -> client: CURLOPT_READFUNCTION callback
+activate client
+return return 100 bytes
+curl --> server_post: Send data (100 bytes)
+curl -> client: CURLOPT_READFUNCTION callback
+activate client
+return return 100 bytes
+curl --> server_post: Send data (100 bytes)
+
+... cont ...
+
+curl -> client: CURLOPT_READFUNCTION callback
+activate client
+return return 74 bytes
+curl -> server_post: Send data (74 bytes)
+curl -> client: CURLOPT_READFUNCTION callback
+activate client
+return return 0 bytes
+
+server_post --> curl: header
+note left of server_post
+    HTTP/2 200
+    date: Mon, 06 Sep 2021 00:51:51 GMT
+end note
+
+... <b>after 3 seconds</b> ...
+
+server_get --> curl: data
+note left of server_get
+    "GET-FINISHED"
+end note
+deactivate server_get
+
+... <b>after 2 seconds</b> ...
+
+server_post --> curl: data
+note left of server_post
+    "POST-FINISHED"
+end note
+
+
+@enduml
