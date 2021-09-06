@@ -47,6 +47,7 @@ jobs:
         run: |
           cd externals/curl
           git checkout ${{ matrix.curlHash }}
+          git log --pretty=oneline -10
       - name: Build
         run: |
           mkdir build && cd build
