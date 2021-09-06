@@ -168,9 +168,9 @@ static CURL *upload_setup(void)
 {
   FILE *out;
   FILE *in;
-  const char *url = "https://curl.se/";
+  const char *url = "https://127.0.0.1:8081/post";
   const char *filename = "output";
-  const char *upload = "debugit";
+  const char *upload = "dummy.dat";
   struct stat file_info;
   curl_off_t uploadsize;
   CURL *hnd;
@@ -231,7 +231,7 @@ static CURL *upload_setup(void)
 
 static CURL *get_setup(void)
 {
-  const char *url = "https://curl.se/";
+  const char *url = "https://127.0.0.1:8081/longPolling";
   CURL *hnd;
 
   hnd = curl_easy_init();
@@ -258,9 +258,8 @@ static CURL *get_setup(void)
  */
 int main(int argc, char **argv)
 {
-  struct input trans[NUM_HANDLES];
   CURL *upload_hnd = upload_setup();
-  CURL *get_hnd = upload_setup();
+  CURL *get_hnd = get_setup();
 
   curl_easy_perform(get_hnd);
   curl_easy_perform(upload_hnd);
