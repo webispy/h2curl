@@ -160,7 +160,7 @@ int my_trace(CURL *handle, curl_infotype type,
 static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   FILE *i = userp;
-  size_t retcode = fread(ptr, size, nmemb, i);
+  size_t retcode = fread(ptr, 1, 100, i); /* send 100 bytes per callback */
   return retcode;
 }
 
@@ -260,11 +260,47 @@ int main(int argc, char **argv)
 {
   CURL *upload_hnd = upload_setup();
   CURL *get_hnd = get_setup();
+  CURLM *multi_handle;
+  static time_t base_time;
+  static time_t now;
+  int still_running = 0; /* keep number of running handles */
+  int fired = 0;
 
-  curl_easy_perform(get_hnd);
-  curl_easy_perform(upload_hnd);
+  /* init a multi stack */
+  multi_handle = curl_multi_init();
+  curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
 
+  /* First request */
+  curl_multi_add_handle(multi_handle, get_hnd);
+
+  time(&base_time);
+
+  do {
+    CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+    if (still_running == 0)
+      break;
+
+    /* wait for activity, timeout or "nothing" */
+    mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
+
+    time(&now);
+    fprintf(stderr, ".\n");
+
+    /* after 7 seconds, POST request start */
+    if (now - base_time >= 7 && fired == 0) {
+      curl_multi_add_handle(multi_handle, upload_hnd);
+      fired = 1;
+    }
+
+    if (mc)
+      break;
+  } while (still_running);
+
+  curl_multi_cleanup(multi_handle);
+
+  curl_multi_remove_handle(multi_handle, get_hnd);
   curl_easy_cleanup(get_hnd);
+  curl_multi_remove_handle(multi_handle, upload_hnd);
   curl_easy_cleanup(upload_hnd);
 
   return 0;
