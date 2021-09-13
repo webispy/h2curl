@@ -20,6 +20,7 @@ jobs:
           [
             c4e6968,
             842f73d,
+            3cb8a74,
             master
           ]
         testApp:
